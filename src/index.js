@@ -25,13 +25,17 @@ app.wss = new Server({
     server: app.server
 });
 
-const clients = new Set();
+const clients = [];
 
 app.wss.on('connection', (connection) => {
     console.log('==> A new connection');
 
     const userId = uuid();
-    clients.add(userId);
+    const user = {
+        userId,
+        connection
+    };
+    clients.push(user);
     console.log('==> userId:', userId);
 
     connection.on('message', message => {
@@ -43,7 +47,8 @@ app.wss.on('connection', (connection) => {
     connection.on('close', () => {
         console.log('==> A client left:', userId);
 
-        clients.delete(userId);
+        const userIndex = clients.findIndex(client => client.userId);
+        clients.splice(userIndex, 1);
     })
 });
 
